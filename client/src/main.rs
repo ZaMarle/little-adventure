@@ -5,9 +5,7 @@ use anchor_client::{
     },
     Cluster,
 };
-use little_adventure::instruction;
 use little_adventure::GameDataAccount;
-use std::path::Path;
 use std::rc::Rc;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,15 +13,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rpc_url = "http://127.0.0.1:8899";
     let cluster = Cluster::Custom(rpc_url.to_string(), rpc_url.to_string());
-
-    // Get the path to the current source file
-    let source_file_path = Path::new(file!());
-    println!("{:?}", source_file_path);
-
-    // Get the directory containing the source file
-    let source_dir = Path::new(file!())
-        .parent()
-        .expect("Failed to get source directory");
 
     let keypair_path = match std::env::current_dir() {
         Ok(current_dir_path) => {
@@ -47,7 +36,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         CommitmentConfig::processed(),
     );
 
-    // let program = client.program(little_adventure::ID)?;
     let program = client.program(little_adventure::ID).unwrap();
 
     let (new_account_pda, _bump) =
