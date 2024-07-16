@@ -10,9 +10,6 @@ use little_adventure::GameDataAccount;
 use std::path::Path;
 use std::rc::Rc;
 
-//     accounts, Initialize, MoveLeft, MoveRight,
-// };
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting program!");
 
@@ -30,11 +27,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let keypair_path = match std::env::current_dir() {
         Ok(current_dir_path) => {
-            let path = current_dir_path.join("client/payer_keys.json");
+            let path = current_dir_path
+                .join("programs/little-adventure/payer-keypair.json");
 
             println!("Current dir path: {:?}", current_dir_path);
             println!("Path: {:?}", path);
-            
+
             path
         }
         Err(e) => panic!("Failed to get current working directory: {:?}", e),
@@ -53,25 +51,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let program = client.program(little_adventure::ID).unwrap();
 
     let (new_account_pda, _bump) =
-        Pubkey::find_program_address(&[b"Level3"], &little_adventure::ID);
-
-    let _ = program
-        .request()
-        .accounts(little_adventure::accounts::Initialize {
-            new_game_data_account: new_account_pda,
-            signer: payer.pubkey(),
-            system_program: anchor_client::anchor_lang::system_program::ID,
-        })
-        .args(instruction::Initialize {})
-        .send()?;
+        Pubkey::find_program_address(&[b"Level4"], &little_adventure::ID);
 
     // let _ = program
     //     .request()
-    //     .accounts(little_adventure::accounts::MoveRight {
-    //         game_data_account: new_account_pda,
+    //     .accounts(little_adventure::accounts::Initialize {
+    //         new_game_data_account: new_account_pda,
+    //         signer: payer.pubkey(),
+    //         system_program: anchor_client::anchor_lang::system_program::ID,
     //     })
-    //     .args(instruction::MoveRight {})
+    //     .args(instruction::Initialize {})
     //     .send()?;
+
+    let _ = match program
+        .request()
+        .accounts(little_adventure::accounts::MovePlayer {
+            game_data_account: new_account_pda,
+        })
+        .args(little_adventure::instruction::MovePlayer {
+            next_position: (12, 3, 0),
+        })
+        .send()
+    {
+        Ok(sig) => println!("Transaction successful with sig: {}", sig),
+        Err(e) => panic!("Transaction failed with: {:?}", e),
+    };
 
     println!("program success");
 

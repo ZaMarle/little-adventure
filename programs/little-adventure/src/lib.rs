@@ -1,35 +1,23 @@
 use anchor_lang::prelude::*;
 
-declare_id!("DS8NBLvfyvBFXnpg85pD6B3vwGn8p9cNW1YrgtyWH31d");
+declare_id!("2uuwsb2JYLEFjqBUizwz2FwhzPhBSDRaXk2P1FfG6aNr");
 
 #[program]
 pub mod little_adventure {
     use super::*;
 
     pub fn initialize(context: Context<Initialize>) -> Result<()> {
-        context.accounts.new_game_data_account.player_position = 2;
+        context.accounts.new_game_data_account.player_position = (0, 0, 0);
         msg!("Game begins!");
 
         Ok(())
     }
 
-    pub fn move_right(context: Context<MoveRight>) -> Result<()> {
-        context.accounts.game_data_account.player_position += 1;
-        // if context.accounts.game_data_account.player_position < 3 {
-        //     context.accounts.game_data_account.player_position += 1;
-        // } else {
-        //     msg!("Already at the end!")
-        // }
-
-        Ok(())
-    }
-
-    pub fn move_left(context: Context<MoveLeft>) -> Result<()> {
-        if context.accounts.game_data_account.player_position < 1 {
-            context.accounts.game_data_account.player_position -= 1;
-        } else {
-            msg!("You are already at the start")
-        }
+    pub fn move_player(
+        context: Context<MovePlayer>,
+        next_position: (u8, u8, u8),
+    ) -> Result<()> {
+        context.accounts.game_data_account.player_position = next_position;
 
         Ok(())
     }
@@ -39,7 +27,7 @@ pub mod little_adventure {
 pub struct Initialize<'info> {
     #[account(
         init,
-        seeds = [b"Level3"],
+        seeds = [b"Level4"],
         bump,
         payer = signer,
         space = 8 + 8)]
@@ -51,15 +39,11 @@ pub struct Initialize<'info> {
 
 #[account]
 pub struct GameDataAccount {
-    pub player_position: u8,
+    pub player_position: (u8, u8, u8),
 }
 
 #[derive(Accounts)]
-pub struct MoveRight<'info> {
-    pub game_data_account: Account<'info, GameDataAccount>,
-}
-
-#[derive(Accounts)]
-pub struct MoveLeft<'info> {
+pub struct MovePlayer<'info> {
+    #[account(mut)]
     pub game_data_account: Account<'info, GameDataAccount>,
 }

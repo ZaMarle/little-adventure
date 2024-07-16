@@ -9,6 +9,11 @@ anchor build --program-name "little-adventure"
 
 # Deploy the program
 echo "Deploying the Solana program: little-adventure"
-solana program deploy "target/deploy/little_adventure.so"
+solana program deploy \
+    -k ./programs/little-adventure/payer-keypair.json \
+    target/deploy/little_adventure.so \
+    --upgrade-authority ./programs/little-adventure/payer-keypair.json 
 
 cargo run "./client"
+
+# solana program deploy target/deploy/little_adventure.so
